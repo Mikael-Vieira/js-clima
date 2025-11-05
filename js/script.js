@@ -1,22 +1,15 @@
 "use strict"
 
 // faz as li dentro da div com select colocando cada horario do dia em cada li
-const lista = document.getElementById("lista-horas");
 
-let html = '';
-for (let hora = 0; hora < 24; hora++) {
-    html += `<li>${hora.toString().padStart(2, '0')}:00</li>`;
-}
-
-lista.innerHTML = html;
 //////////////
 
 
 const input = document.getElementById("input-pagina");
 const botao = document.getElementById("button-pagina");
 
-input.addEventListener("keydown", function (event){
-    if (event.key === "Enter"){
+input.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
         botao.click();
     }
 });
@@ -83,16 +76,33 @@ async function recebendoDadosApi() {
     const pegarMin = dadosApi2.daily.temperature_2m_min;
     const min = ["min-1", "min-2", "min-3", "min-4", "min-5", "min-6", "min-7"];
 
-    for(let i = 0; i < min.length; i++ ){
+    for (let i = 0; i < min.length; i++) {
         document.getElementById(min[i]).innerText = `${pegarMin[i].toFixed(0)}°`;//para nao usar as casas decimais
     }
 
     const pegarMax = dadosApi2.daily.temperature_2m_max;
     const max = ["max-1", "max-2", "max-3", "max-4", "max-5", "max-6", "max-7"];
 
-    for(let i = 0; i < max.length; i++ ){
+    for (let i = 0; i < max.length; i++) {
         document.getElementById(max[i]).innerText = `${pegarMax[i].toFixed(0)}°`;
     }
+}
+
+
+async function usandoSelect() {
+    let receberNome = document.getElementById("input-pagina").value;
+    const nome_limpo = receberNome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    let api = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${nome_limpo}&count=10&language=en&format=json`);
+    let dadosApi = await api.json();
+
+    let latApi = dadosApi.results[0].latitude;
+    let longApi = dadosApi.results[0].longitude;
+
+    let api2 = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latApi}&longitude=${longApi}&daily=temperature_2m_min,temperature_2m_max,weather_code&hourly=temperature_2m,weather_code&current=temperature_2m,relative_humidity_2m,snowfall,showers,rain,precipitation,weather_code,wind_speed_10m,is_day,apparent_temperature`);
+    let dadosApi2 = await api2.json();
+
+
 }
 
 //mapeando cada image de acordo com o codigo enviado pela API
